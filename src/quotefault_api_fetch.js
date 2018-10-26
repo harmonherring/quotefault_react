@@ -7,7 +7,9 @@ class Quotefault extends Component {
 
     this.state = {
       displayData: [],
-      searchValue: ''
+      searchValue: '',
+      priceSearch: '',
+      numItems: 10
     }
 
   }
@@ -28,13 +30,35 @@ class Quotefault extends Component {
     });
   }
 
+  handlePriceChange = (event) => {
+    this.setState({
+      priceSearch: event.target.value,
+    });
+  }
+
+  mySlice = (a) => {
+    a.length = this.state.numItems;
+    return a
+  }
+
+  myTest = () => {
+    let test = this.state.displayData.filter(coin => coin.name.toUpperCase().includes(this.state.searchValue.toUpperCase()) && coin.price_usd.toUpperCase().includes(this.state.priceSearch.toUpperCase()));
+    return test;
+  }
+
   render() {
     return(
       <>
       <input type="text" placeholder="Search" value={this.state.searchValue} onChange={this.handleSearchChange} />
+      <input type="text" placeholder="Search" value={this.state.priceSearch} onChange={this.handlePriceChange} />
       <ul>
-        {this.state.displayData.filter(coin => coin.name.toUpperCase().includes(this.state.searchValue.toUpperCase())).map(coin =>
+
+        {
+
+          this.state.displayData.filter(coin => coin.name.toUpperCase().includes(this.state.searchValue.toUpperCase()) && coin.price_usd.toUpperCase().includes(this.state.priceSearch.toUpperCase())).slice(0, this.state.numItems).map(coin =>
+
           <li key={coin.rank}>{coin.name}</li>
+
         )}
       </ul>
       </>
