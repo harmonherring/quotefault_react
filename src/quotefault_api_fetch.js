@@ -46,6 +46,14 @@ class Quotefault extends Component {
     return test;
   }
 
+  loadMore = (event) => {
+    event.preventDefault();
+    let newItems = this.state.numItems + 10;
+    this.setState({
+      numItems: newItems,
+    });
+  }
+
   render() {
     return(
       <>
@@ -61,6 +69,8 @@ class Quotefault extends Component {
 
         )}
       </ul>
+
+      <input type="submit" value="Load 10 More" onClick={this.loadMore} />
       </>
     );
   }
