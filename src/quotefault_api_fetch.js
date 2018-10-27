@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import './quotefault-api.css'
 
+
 class Quotefault extends Component {
   constructor(props) {
     super(props);
@@ -15,7 +16,7 @@ class Quotefault extends Component {
   }
 
   fetchAPI = () => {
-    fetch('https://api.coinmarketcap.com/v1/ticker/')
+    fetch('https://quotefault-api.csh.rit.edu/06d5ac1444c1eaed2723/all')
     .then(response => response.json())
     .then(jsonresponse => this.setState({ displayData: jsonresponse }));
   }
@@ -30,20 +31,9 @@ class Quotefault extends Component {
     });
   }
 
-  handlePriceChange = (event) => {
-    this.setState({
-      priceSearch: event.target.value,
-    });
-  }
-
   mySlice = (a) => {
     a.length = this.state.numItems;
     return a
-  }
-
-  myTest = () => {
-    let test = this.state.displayData.filter(coin => coin.name.toUpperCase().includes(this.state.searchValue.toUpperCase()) && coin.price_usd.toUpperCase().includes(this.state.priceSearch.toUpperCase()));
-    return test;
   }
 
   loadMore = (event) => {
@@ -58,17 +48,14 @@ class Quotefault extends Component {
     return(
       <>
       <input type="text" placeholder="Search" value={this.state.searchValue} onChange={this.handleSearchChange} />
-      <input type="text" placeholder="Search" value={this.state.priceSearch} onChange={this.handlePriceChange} />
-      <ul>
 
         {
 
-          this.state.displayData.filter(coin => coin.name.toUpperCase().includes(this.state.searchValue.toUpperCase()) && coin.price_usd.toUpperCase().includes(this.state.priceSearch.toUpperCase())).slice(0, this.state.numItems).map(coin =>
+          this.state.displayData.filter(quote => quote.quote.toUpperCase().includes(this.state.searchValue.toUpperCase()) || quote.speaker.toUpperCase().includes(this.state.searchValue.toUpperCase())).slice(0, this.state.numItems).map(quote =>
 
-          <li key={coin.rank}>{coin.name}</li>
+          <li key={quote.id}>{quote.quote} - {quote.speaker}</li>
 
         )}
-      </ul>
 
       <input type="submit" value="Load 10 More" onClick={this.loadMore} />
       </>
