@@ -18,7 +18,7 @@ class Quotefault extends Component {
   fetchAPI = () => {
     fetch('https://quotefault-api.csh.rit.edu/06d5ac1444c1eaed2723/all')
     .then(response => response.json())
-    .then(jsonresponse => this.setState({ displayData: jsonresponse }));
+    .then(jsonresponse => this.setState({ displayData: jsonresponse.reverse() }));
   }
 
   componentDidMount() {
