@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
-import './quotefault-api.css'
+import Quoteblock from './quoteblock.js';
+import './quotefaultcss.css';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 
 class Quotefault extends Component {
@@ -10,9 +12,9 @@ class Quotefault extends Component {
       displayData: [],
       searchValue: '',
       priceSearch: '',
-      numItems: 10
+      numItems: 10,
+      pageNum: 1,
     }
-
   }
 
   fetchAPI = () => {
@@ -22,12 +24,18 @@ class Quotefault extends Component {
   }
 
   componentDidMount() {
-    this.fetchAPI()
+    this.fetchAPI();
   }
 
   handleSearchChange = (event) => {
     this.setState({
       searchValue: event.target.value
+    });
+  }
+
+  changePage = (event) => {
+    this.setState({
+      pageNum: event.target.value
     });
   }
 
@@ -47,17 +55,21 @@ class Quotefault extends Component {
   render() {
     return(
       <>
-      <input type="text" placeholder="Search" value={this.state.searchValue} onChange={this.handleSearchChange} />
+      <input type="text" className="form-control quote-search col-sm-2" placeholder="Search" value={this.state.searchValue} onChange={this.handleSearchChange} />
 
         {
 
           this.state.displayData.filter(quote => quote.quote.toUpperCase().includes(this.state.searchValue.toUpperCase()) || quote.speaker.toUpperCase().includes(this.state.searchValue.toUpperCase())).slice(0, this.state.numItems).map(quote =>
 
-          <li key={quote.id}>{quote.quote} - {quote.speaker}</li>
+          <Quoteblock key={quote.id} quote={quote.quote} speaker={quote.speaker} submitter={quote.submitter} quoteTime={quote.quoteTime} />
 
         )}
 
-      <input type="submit" value="Load 10 More" onClick={this.loadMore} />
+      <div className="pagination mx-auto">
+        <FontAwesomeIcon icon="angle-double-left" />
+        <FontAwesomeIcon icon="angle-left" />
+        <input type="text" className="form-control" value={this.state.pageNum} onChange={this.changePage} />
+      </div>
       </>
     );
   }

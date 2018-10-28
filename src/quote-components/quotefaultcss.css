@@ -1,0 +1,13 @@
+.quote-search {
+  margin-top:20px;
+}
+
+.page-box {
+  padding:20px !important;
+  border-radius:5px;
+  border:1px solid silver !important;
+}
+
+.pagination {
+  margin:25px auto;
+}
