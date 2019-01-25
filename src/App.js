@@ -31,11 +31,11 @@ class App extends Component {
   render() {
     return (
       <>
-      <link href="https://themeswitcher.csh.rit.edu/api/get" rel="stylesheet" />
-      <Quotefault_Navbar />
-      <div className="container">
-        <Quotefault />
-      </div>
+        <link href="https://themeswitcher.csh.rit.edu/api/get" rel="stylesheet" />
+        <Quotefault_Navbar />
+        <div className="container">
+          <Quotefault />
+        </div>
       </>
     );
   }

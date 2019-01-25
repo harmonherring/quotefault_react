@@ -10,10 +10,10 @@ class Quoteblock extends Component {
     return(
       <div className="quoteBlock">
         <div className="topHalf">
-          <p>"{this.props.quote}" <strong>- {this.props.speaker}</strong></p>
+          <p>"{this.props.quote}" <strong>- {this.props.speaker_name} ({this.props.speaker_uname})</strong></p>
         </div>
         <div className="bottomHalf">
-          <p>Submitted by <a href="#">{this.props.submitter}</a> on {this.props.quoteTime}</p>
+          <p>Submitted by <a href="#">{this.props.submitter_name} ({this.props.submitter_uname})</a> on {this.props.quoteTime}</p>
         </div>
       </div>
     );
