@@ -10,21 +10,21 @@ class Quotefault extends Component {
 
     this.state = {
       displayData: [],
-      numItems: 10,
-      pageNum: 1,
+      pageSize: 10,
+      pageId: 0,
       ldapMembers: [],
       quoteQuery: [],
       submitterQuery: '',
       speakerQuery: '',
     }
   }
-
+/*
   fetchQuotefaultAPI = () => {
     fetch('http://127.0.0.1:5000/06d5ac1444c1eaed2723/offset/20/0')
     .then(response => response.json())
     .then(jsonresponse => this.setState({ displayData: jsonresponse }));
   }
-
+*/
   fetchLdapAPI = () => {
     fetch('http://127.0.0.1:5000/06d5ac1444c1eaed2723/ldap/get_all_members')
     .then(response => response.json())
@@ -41,33 +41,37 @@ class Quotefault extends Component {
     })
   }
 
-  componentDidMount() {
-    this.fetchQuotefaultAPI();
-    this.fetchLdapAPI();
+  fetchQuotefaultAPI = (speaker, submitter, quote) => {
+    let query = 'http://127.0.0.1:5000/06d5ac1444c1eaed2723/search?' +
+                'page_size=' + this.state.pageSize +
+                '&page_id=' + this.state.pageId + '&';
+    if (speaker) {
+      query = query + "speaker=" + speaker + "&";
+    }
+    if (submitter) {
+      query = query + "submitter=" + submitter + "&";
+    }
+    if (quote) {
+      let quoteQuery = "";
+      quote.forEach(function(word) {
+        quoteQuery += word;
+      });
+      query = query + "quote=" + quote + "&";
+    }
+
+    fetch(query)
+    .then(response => response.json())
+    .then(jsonresponse => this.setState({displayData: jsonresponse}));
   }
 
-  handleSearchChange = (event) => {
-    this.setState({
-      searchValue: event.target.value
-    });
+  componentDidMount() {
+    this.fetchQuotefaultAPI(null, null, null);
+    this.fetchLdapAPI();
   }
 
   changePage = (event) => {
     this.setState({
       pageNum: event.target.value
-    });
-  }
-
-  mySlice = (a) => {
-    a.length = this.state.numItems;
-    return a
-  }
-
-  loadMore = (event) => {
-    event.preventDefault();
-    let newItems = this.state.numItems + 10;
-    this.setState({
-      numItems: newItems,
     });
   }
 
@@ -133,41 +137,44 @@ class Quotefault extends Component {
       }
       this.setState({
         quoteQuery: quoteQuery,
-        speakerQuery: speakerQuery,
         submitterQuery: submitterQuery,
+        speakerQuery: speakerQuery,
       });
+      this.fetchQuotefaultAPI(speakerQuery, submitterQuery, quoteQuery);
+
     }
   }
 
   render() {
     return(
       <>
-      <input
-          type="text"
-          classsName="form-control quote-search col-sm-2"
-          placeholder="Search"
-          value={this.state.searchValue}
-          onChange={this.getSearchQuery} />
+        <input
+            type="text"
+            classsName="form-control quote-search col-sm-2"
+            placeholder="Search"
+            value={this.state.searchValue}
+            onChange={this.getSearchQuery} />
 
-        {
+          {
 
-          this.state.displayData.map(quote =>
+            this.state.displayData.map(quote =>
 
-          <Quoteblock key={quote.id} quote={quote.quote}
-                      speaker_name={this.getName(quote.speaker)}
-                      speaker_uname={quote.speaker}
-                      submitter_name={this.getName(quote.submitter)}
-                      submitter_uname={quote.submitter}
-                      quoteTime={quote.quoteTime} />
+            <Quoteblock key={quote.id} quote={quote.quote}
+                        speaker_name={this.getName(quote.speaker)}
+                        speaker_uname={quote.speaker}
+                        submitter_name={this.getName(quote.submitter)}
+                        submitter_uname={quote.submitter}
+                        quoteTime={quote.quoteTime} />
 
-        )}
+          )}
 
-      <div className="pagination mx-auto">
-        <FontAwesomeIcon icon="angle-double-left" />
-        <FontAwesomeIcon icon="angle-left" />
-        <input type="text" className="form-control" value={this.state.pageNum} onChange={this.changePage} />
-      </div>
-}
+        {/*
+        <div className="pagination mx-auto">
+          <FontAwesomeIcon icon="angle-double-left" />
+          <FontAwesomeIcon icon="angle-left" />
+          <input type="text" className="form-control" value={this.state.pageNum} onChange={this.changePage} />
+        </div>
+        */}
       </>
     );
   }
