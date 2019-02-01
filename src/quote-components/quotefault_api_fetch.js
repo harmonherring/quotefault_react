@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import Quoteblock from './quoteblock.js';
 import './quotefaultcss.css';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import Autosuggest from 'react-autosuggest';
 
 
 class Quotefault extends Component {
@@ -13,9 +14,11 @@ class Quotefault extends Component {
       pageSize: 10,
       pageId: 0,
       ldapMembers: [],
+      searchQuery: '',
       quoteQuery: [],
       submitterQuery: '',
       speakerQuery: '',
+      memberSearch:[],
     }
   }
 /*
@@ -25,6 +28,7 @@ class Quotefault extends Component {
     .then(jsonresponse => this.setState({ displayData: jsonresponse }));
   }
 */
+
   fetchLdapAPI = () => {
     fetch('http://127.0.0.1:5000/06d5ac1444c1eaed2723/ldap/get_all_members')
     .then(response => response.json())
@@ -67,12 +71,7 @@ class Quotefault extends Component {
   componentDidMount() {
     this.fetchQuotefaultAPI(null, null, null);
     this.fetchLdapAPI();
-  }
-
-  changePage = (event) => {
-    this.setState({
-      pageNum: event.target.value
-    });
+    this.createSearchlist();
   }
 
   getName = (name) => {
@@ -89,6 +88,8 @@ class Quotefault extends Component {
 
   getSearchQuery = (phrase) => {
     phrase = phrase.target.value;
+    this.setState({searchQuery: phrase});
+
     let array = phrase.split(" ");
 
     let quoteQuery = [];
@@ -145,13 +146,40 @@ class Quotefault extends Component {
     }
   }
 
+  createSearchlist = () => {
+    for (var key in this.state.ldapMembers) {
+      this.state.memberSearch.push(
+        {
+          username:key,
+          searchableValue: this.state.ldapMembers[key] + " (" + key + ")",
+        }
+      );
+    }
+  }
+
+  getSuggestions = (value) => {
+    const inputValue = value.replace(/ /g,'').toLowerCase();
+
+    return inputValue.length < 2 ? [] : this.state.memberSearch.filter(
+      this.state.memberSearch.searchableValue.toLowerCase().replace(/ /g,'').slice(0, inputValue.length) === inputValue
+    );
+  }
+
+  renderSuggestion = (suggestion) => (
+    <div>
+      {this.state.searchQuery + this.state.memberSearch.searchableValue}
+    </div>
+  );
+
   render() {
     return(
       <>
+
         <input
             type="text"
             classsName="form-control quote-search col-sm-2"
             placeholder="Search"
+            list="users"
             value={this.state.searchValue}
             onChange={this.getSearchQuery} />
 
@@ -166,15 +194,10 @@ class Quotefault extends Component {
                         submitter_uname={quote.submitter}
                         quoteTime={quote.quoteTime} />
 
+
+
           )}
 
-        {/*
-        <div className="pagination mx-auto">
-          <FontAwesomeIcon icon="angle-double-left" />
-          <FontAwesomeIcon icon="angle-left" />
-          <input type="text" className="form-control" value={this.state.pageNum} onChange={this.changePage} />
-        </div>
-        */}
       </>
     );
   }
