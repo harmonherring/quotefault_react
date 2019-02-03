@@ -4,6 +4,32 @@ import './quotefaultcss.css';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import Autosuggest from 'react-autosuggest';
 
+import './autosuggest.css';
+
+function getSuggestions(value)  {
+  let parsedValue = [];
+
+  let tempParsed = value.replace(/ /g, '').trim().toLowerCase().split('speaker:');
+  for (let i = 0; i < tempParsed.length; i++) {
+    let temp = tempParsed[i].split('submitter:');
+    for (let j = 0; j < temp.length; j++) {
+      parsedValue.push(temp[j]);
+    }
+  }
+  let searchValue = parsedValue[parsedValue.length-1];
+
+  return suggestions.filter(user => user.searchableValue.toLowerCase().includes(searchValue));
+}
+
+const getSuggestionValue = (suggestion) => this.state.searchQuery + suggestion.username;
+
+const renderSuggestion = suggestion => (
+  <div>
+    {suggestion.searchableValue}
+  </div>
+);
+
+let suggestions = [];
 
 class Quotefault extends Component {
   constructor(props) {
@@ -18,7 +44,8 @@ class Quotefault extends Component {
       quoteQuery: [],
       submitterQuery: '',
       speakerQuery: '',
-      memberSearch:[],
+      suggestions:[],
+      value: '',
     }
   }
 /*
@@ -43,6 +70,40 @@ class Quotefault extends Component {
       }
       return false;
     })
+  }
+
+  createSearchlist = () => {
+
+    for (var key in this.state.ldapMembers) {
+      suggestions.push(
+        {
+          username:key,
+          searchableValue: this.state.ldapMembers[key] + " (" + key + ")",
+        }
+      );
+    }
+  }
+
+  getSuggestionValue = (suggestion) => {
+    let tempQuery = this.state.value.split(":");
+    let finalQuery = '';
+    for (let i = 0; i < tempQuery.length-1; i++) {
+      finalQuery += tempQuery[i];
+      finalQuery += ':';
+    }
+    return finalQuery + suggestion.username;
+  }
+
+  onSuggestionsFetchRequested = ({ value }) => {
+    this.setState({
+      suggestions: getSuggestions(value)
+    });
+  }
+
+  onSuggestionsClearRequested = () => {
+    this.setState({
+      suggestions: [],
+    });
   }
 
   fetchQuotefaultAPI = (speaker, submitter, quote) => {
@@ -71,7 +132,11 @@ class Quotefault extends Component {
   componentDidMount() {
     this.fetchQuotefaultAPI(null, null, null);
     this.fetchLdapAPI();
-    this.createSearchlist();
+    let _this = this
+    setTimeout(function() {
+      _this.createSearchlist();
+    }, 1000);
+    console.log("test me now".split("now"));
   }
 
   getName = (name) => {
@@ -146,35 +211,40 @@ class Quotefault extends Component {
     }
   }
 
-  createSearchlist = () => {
-    for (var key in this.state.ldapMembers) {
-      this.state.memberSearch.push(
-        {
-          username:key,
-          searchableValue: this.state.ldapMembers[key] + " (" + key + ")",
-        }
-      );
+  shouldRenderSuggestions = (value) => {
+    let valueArray = value.replace(/ /g, '').trim().split(' ');
+    let lastVal = valueArray.length-1;
+    let parsedValue = [];
+
+    let tempParsed = value.trim().toLowerCase().split('speaker:');
+    for (let i = 0; i < tempParsed.length; i++) {
+      let temp = tempParsed[i].split('submitter:');
+      for (let j = 0; j < temp.length; j++) {
+        parsedValue.push(temp[j]);
+      }
     }
+
+    let trueValueLength = tempParsed[tempParsed.length-1].length;
+
+    return ((trueValueLength > 2) && ((valueArray[lastVal].includes("speaker:"))) || (valueArray[lastVal].includes("submitter:")));
   }
 
-  getSuggestions = (value) => {
-    const inputValue = value.replace(/ /g,'').toLowerCase();
-
-    return inputValue.length < 2 ? [] : this.state.memberSearch.filter(
-      this.state.memberSearch.searchableValue.toLowerCase().replace(/ /g,'').slice(0, inputValue.length) === inputValue
-    );
+  onChange = (event, {newValue}) => {
+    this.setState({
+      value: newValue
+    });
   }
-
-  renderSuggestion = (suggestion) => (
-    <div>
-      {this.state.searchQuery + this.state.memberSearch.searchableValue}
-    </div>
-  );
 
   render() {
+    const {value} = this.state;
+    const inputProps = {
+      placeholder: "Type some shit",
+      value,
+      onChange: this.onChange
+    }
+
     return(
       <>
-
         <input
             type="text"
             classsName="form-control quote-search col-sm-2"
@@ -182,6 +252,18 @@ class Quotefault extends Component {
             list="users"
             value={this.state.searchValue}
             onChange={this.getSearchQuery} />
+
+            <Autosuggest
+              suggestions={this.state.suggestions}
+              onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+              onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+              getSuggestionValue={this.getSuggestionValue}
+              renderSuggestion={renderSuggestion}
+              shouldRenderSuggestions={this.shouldRenderSuggestions}
+              inputProps={inputProps}
+              />
+
+
 
           {
 
